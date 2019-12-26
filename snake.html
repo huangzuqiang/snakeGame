@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>贪吃蛇</title>
+		<style>
+			#map {
+				width:400px;
+				height:400px;
+				border: 1px solid black;
+			}
+			
+			.divMap{
+				width:18px;
+				height: 18px;
+				margin:1px;
+				background-color: yellow;
+				float:left;
+			}
+			.divSnake{
+				width:18px;
+				height: 18px;
+				margin:1px;
+				background-color: red;
+				float:left;
+			}
+			.divFood{
+				width:18px;
+				height: 18px;
+				margin:1px;
+				background-color: green;
+				float:left;
+			}
+		</style>
+		<script type="text/javascript">
+			var mapX = 20,mapY = 20;
+			var arrMap = new Array();
+			var arrX = [3,3,3];
+			var arrY = [3,4,5];
+			var keyCode = 39;
+			var originCode;
+			var foodX,foodY;
+			//创建地图
+			function createMap(){
+				var map =document.getElementById("map");
+				for(y = 0;y<mapY;y++){
+					arrMap[y] = new Array();
+					for(x=0;x<mapY;x++){
+						var div = document.createElement("div");
+						div.className = "divMap";
+						arrMap[y][x] = div;
+						map.appendChild(div)
+					}
+				}
+			}
+			
+			function createSnake(){
+				for(i = 0;i<arrX.length;i++){
+					arrMap[arrX[i]][arrY[i]].className = "divSnake"
+				}
+			}
+			//创建食物
+			function createFood(){
+				result = false;
+				do{
+					foodX = parseInt(Math.random()*mapX);
+					foodY = parseInt(Math.random()*mapY);
+					for(i = 0;i< arrX.length;i++){
+						if(arrX[i] == foodX && arrY[i] == foodY){
+							result = true;
+						}
+					}
+				}while(result)
+				arrMap[foodX][foodY].className = "divFood";
+			}
+			//蛇的移动
+			function moveSnake(){
+				clearSnake();
+				
+				for(i = 0; i< arrX.length-1;i++){
+					arrX[i] = arrX[i+1];
+					arrY[i] = arrY[i+1];
+				}
+				if(keyCode == 37){//向左
+					arrY[arrY.length-1]--;
+					originCode = 37;
+				} else if(keyCode == 38){//向上
+					arrX[arrX.length-1]--;
+					originCode = 38;
+				} else if(keyCode == 39){//向右
+					arrY[arrY.length-1]++;
+					originCode = 39;
+				} else if(keyCode == 40){//向下
+					arrX[arrX.length-1]++;
+					originCode = 40;
+				}
+				//吃到食物
+				if(arrX[arrX.length-1]==foodX&&arrY[arrY.length-1]==foodY){
+					arrX[arrX.length] = foodX;
+					arrY[arrY.length] = foodY;
+					createFood();
+					for(i = arrX.length-1;i>0;i--){
+						arrX[i] = arrX[i-1];
+						arrY[i] = arrY[i-1];
+					}
+				}
+
+				//是否撞墙
+				if(arrY[arrY.length-1]<0||
+				arrY[arrY.length-1]>=mapY||
+				arrX[arrX.length-1]<0||
+				arrX[arrX.length-1]>=mapX){
+					clearInterval(move);
+					alert("游戏结束！")
+					return;
+				}
+				//是否撞自己
+				for(i = 0;i < arrX.length-1 ;i++){
+					if(arrX[arrX.length-1] == arrX[i]&&arrY[arrY.length-1]==arrY[i]){
+						clearInterval(move);
+						alert("游戏结束！");
+						return;
+					}
+				}
+				createSnake();
+			}
+			//清楚画布
+			function clearSnake(){
+				for(i = 0;i<arrX.length;i++){
+					arrMap[arrX[i]][arrY[i]].className = "divMap"
+				}
+			}
+			//键盘方向事件
+			function keyDown(){
+				keyCode = event.keyCode;
+				if(keyCode<37||keyCode>40||originCode == 37 && keyCode == 39||
+				originCode == 39 && keyCode == 37||
+				originCode == 38 && keyCode == 40||
+				originCode == 40 && keyCode == 38){
+					keyCode = originCode;
+				}
+			}
+			
+			window.onload = function(){
+				createMap();
+				createSnake();
+				createFood();
+				move = setInterval("moveSnake()",200)
+				document.onkeydown = keyDown;
+			}
+		</script>
+	</head>
+	<body>
+		<div id = "map"></div>
+	</body>
+</html>
